@@ -5,9 +5,23 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 #IfWinActive ahk_exe Substance Designer.exe
 
-; ----- Global Variables -----
+; ----- --- HOW TO --- -----
 
-globalSleepTimer = 500
+; to add simple hotkeys, just type in the key followed by :: and the instructions.
+; e.g.: 
+;		b:: 
+;			SOME INSTRUCTIONS
+;		Return
+
+
+; If you want different behavior depending on wether or now modifier keys are pressed down,
+; use the function NodeFunction declared at the bottom of this script.
+
+; The best way to do so is to define the parameters in a string variable, then use it on ~*LButton (first line under 'Atomic Nodes' Header)
+; as well as on the key you want to use as hotkey.
+; Parameters are as follows: Hotkey, NodeName, ShiftNodeName, ControlNodeName, AltNodeName.
+; If in doubt, try to copy one existing hotkey and modify parts of it.
+
 
 ; ----- Commenting -----
 ^f::
@@ -22,143 +36,65 @@ Return
 
 ; ----- Atomic Nodes -----
 
-~h::
-	NodeFunction("h", "Histogram Scan")
-Return
-
-~l::
-	NodeFunction("l", "Levels")
-Return
-
 ~*LButton::
 	bString := "b, Blend, Blur, Blur HQ"
+	; NodeFunction(bString)
 
-	NodeFunction("h", "Histogram Scan")
-	NodeFunction("l", "Levels")
-	NodeFunction_Complex("w", "Warp", "Directional Warp", "", "")
-	;NodeFunction_Complex("b", "Blend", "Blur", "Blur HQ Grayscale", "Blur HQ Color")
-	NodeFunction_StringParameter(bString)
-Return
+	hString := "h, Histogram Scan, Histogram Range"
+	; NodeFunction(hString)
 
-NodeFunction(hotkey, nodeName)
-{
-	enableSend := !enableSend
+	lString := "l, Levels"
+	; NodeFunction(lString)
 
-	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
-	{
-			Send, {space}%NodeName%{enter}
-			sleep, globalSleepTimer
-	}
+	wString := "w, Warp, Directional Warp"
+	; NodeFunction(wString)
 
-	SetTimer, DisableSend, 50
-}
+	tString := "t, Transform 2D"
+	; NodeFunction(tString)
 
-DisableSend:
-enableSend := 0
-Return
+	nString := "n, Normal, Normal Sobel"
+	; NodeFunction(nString)
 
+	uString := "u, Uniform Color, Normal Color"
+	; NodeFunction(uString)
 
-~*w::
-	NodeFunction_Complex("w", "Warp", "Directional Warp", "", "")
+	pString := "p, Perlin"
+	; NodeFunction(pString)
+
 Return
 
 ~*b::
-	NodeFunction_StringParameter(bString)
+	NodeFunction(bString)
 Return
 
-NodeFunction_Complex(hotkey, baseName, shiftName, controlName, altName)
-{
-	enableSend_Complex := !enableSend
-
-	; -- Only do something if the hotkey is pressed.
-	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
-	{
-		; -- Which NodeName is used depends on which modifier key is pressed.
-		NodeName = %baseName%
-		if(GetKeyState("Shift", "P") && StrLen(shiftName) > 0)
-		{
-			NodeName = %shiftName%
-		}
-		if(GetKeyState("Control", "P") && StrLen(controlName) > 0)
-		{
-			NodeName = %controlName%
-		}
-		if(GetKeyState("Alt", "P") && StrLen(altName) > 0)
-		{
-			NodeName = %altName%
-		}
-
-		; -- send the input
-		Send, {space}%NodeName%{enter}
-	}
-
-	SetTimer, DisableSend_Complex, 50
-}
-
-NodeFunction_StringParameter(complexString)
-{
-	parameterArray := StrSplit(complexString, ", ")
-
-	hotkey = % parameterArray[1]
-	baseName = % parameterArray[2]
-	shiftName = % parameterArray[3]
-	controlName = % parameterArray[4]
-	altName = % parameterArray[5]
-	
-	NodeFunction_Complex(hotkey, baseName, shiftName, controlName, altName)
-}
-
-DisableSend_Complex:
-enableSend_Complex := 0
+~*h::
+	NodeFunction(hString)
 Return
 
-
-
-
-
-
-!w::
-	Send, {space}Directional Warp{enter}
+~*l::
+	NodeFunction(lString)
 Return
 
-
-~t & ~LButton::
-	Send, {space}Transformation 2D{enter}
+~*w::
+	NodeFunction(wString)
 Return
 
-^t::
-	Send, {space}Transformation 2D{enter}
+~*t::
+	NodeFunction(tString)
 Return
 
-
-~n & ~LButton::
-	Send, {space}Normal{enter}
+~*n::
+	NodeFunction(nString)
 Return
 
-^n::
-	Send, {space}Normal{enter}
+~*u::
+	NodeFunction(uString)
 Return
 
-
-~u & ~LButton::
-	Send, {space}uniform color{enter}
+~*p::
+	NodeFunction(pString)
 Return
 
-^u::
-	Send, {space}uniform color{enter}
-Return
-
-
-~p & ~LButton::
-	Send, {space}Perlin{enter}
-Return
-
-
-~r::
-	If GetKeyState("LButton","D")
-	Send, {space}Blur{enter}
-	sleep, 500
-Return	
 
 
 ; ----- Common Noise Groups -----
@@ -209,3 +145,53 @@ return
 		Send, {space}Dirt 5{enter}
 return
 
+
+
+; ----- ----- ----- Functions ----- ----- -----
+
+NodeFunction(inputString)
+{
+	; -- parse all inputs
+	parameterArray := StrSplit(inputString, ", ")
+
+	hotkey = % parameterArray[1]
+	baseName = % parameterArray[2]
+	shiftName = % parameterArray[3]
+	controlName = % parameterArray[4]
+	altName = % parameterArray[5]
+
+
+	; -- this in conjunction with 'SetTimer, DisableSend, 50' makes it so
+	;    that this function cannot be called multiple times at once.
+	enableSend := !enableSend
+
+	; -- Only do something if the hotkey and the left mouse button are pressed.
+	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
+	{
+		; -- Which NodeName is used depends on which modifier key is pressed.
+		NodeName = %baseName%
+		if(StrLen(shiftName) > 0 && GetKeyState("Shift", "P"))
+		{
+			NodeName = %shiftName%
+		}
+		if(StrLen(controlName) > 0 && GetKeyState("Control", "P"))
+		{
+			NodeName = %controlName%
+		}
+		if(StrLen(altName) > 0 && GetKeyState("Alt", "P"))
+		{
+			NodeName = %altName%
+		}
+
+		; -- send the input
+		Send, {space}%NodeName%{enter}
+
+		Sleep, 1000
+	}
+
+	SetTimer, DisableSend, 2000
+}
+
+DisableSend:
+enableSend := 0
+Return
