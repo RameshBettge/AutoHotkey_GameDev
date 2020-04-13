@@ -31,12 +31,13 @@ Return
 Return
 
 ~*LButton::
-	
+	bString := "b, Blend, Blur, Blur HQ"
 
 	NodeFunction("h", "Histogram Scan")
 	NodeFunction("l", "Levels")
 	NodeFunction_Complex("w", "Warp", "Directional Warp", "", "")
-	NodeFunction_Complex("b", "Blend", "Blur", "Blur HQ Grayscale", "Blur HQ Color")
+	;NodeFunction_Complex("b", "Blend", "Blur", "Blur HQ Grayscale", "Blur HQ Color")
+	NodeFunction_StringParameter(bString)
 Return
 
 NodeFunction(hotkey, nodeName)
@@ -62,35 +63,49 @@ Return
 Return
 
 ~*b::
-	NodeFunction_Complex("b", "Blend", "Blur", "Blur HQ", "")
+	NodeFunction_StringParameter(bString)
 Return
 
 NodeFunction_Complex(hotkey, baseName, shiftName, controlName, altName)
 {
 	enableSend_Complex := !enableSend
 
-	; -- Which NodeName is used depends on which modifier key is pressed.
-	NodeName = %baseName%
-	if(GetKeyState("Shift", "P") && StrLen(shiftName) > 0)
-	{
-		NodeName = %shiftName%
-	}
-	if(GetKeyState("Control", "P") && StrLen(controlName) > 0)
-	{
-		NodeName = %controlName%
-	}
-	if(GetKeyState("Alt", "P") && StrLen(altName) > 0)
-	{
-		NodeName = %altName%
-	}
-
+	; -- Only do something if the hotkey is pressed.
 	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
 	{
-			Send, {space}%NodeName%{enter}
-			sleep, globalSleepTimer
+		; -- Which NodeName is used depends on which modifier key is pressed.
+		NodeName = %baseName%
+		if(GetKeyState("Shift", "P") && StrLen(shiftName) > 0)
+		{
+			NodeName = %shiftName%
+		}
+		if(GetKeyState("Control", "P") && StrLen(controlName) > 0)
+		{
+			NodeName = %controlName%
+		}
+		if(GetKeyState("Alt", "P") && StrLen(altName) > 0)
+		{
+			NodeName = %altName%
+		}
+
+		; -- send the input
+		Send, {space}%NodeName%{enter}
 	}
 
 	SetTimer, DisableSend_Complex, 50
+}
+
+NodeFunction_StringParameter(complexString)
+{
+	parameterArray := StrSplit(complexString, ", ")
+
+	hotkey = % parameterArray[1]
+	baseName = % parameterArray[2]
+	shiftName = % parameterArray[3]
+	controlName = % parameterArray[4]
+	altName = % parameterArray[5]
+	
+	NodeFunction_Complex(hotkey, baseName, shiftName, controlName, altName)
 }
 
 DisableSend_Complex:
