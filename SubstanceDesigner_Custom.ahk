@@ -5,9 +5,11 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 #IfWinActive ahk_exe Substance Designer.exe
 
+; ----- Global Variables -----
 
+globalSleepTimer = 500
 
-; -- Commenting
+; ----- Commenting -----
 ^f::
 	Send, {space}frame{enter}
 Return
@@ -17,33 +19,71 @@ Return
 Return
 
 
-; --Atomic Nodes
 
-~h & ~LButton::
-	Send, {space}histogram scan{enter}
+; ----- Atomic Nodes -----
+
+~h::
+	NodeFunction("h", "Histogram Scan")
 Return
 
-^h::
-	Send, {space}histogram scan{enter}
+~l::
+	NodeFunction("l", "Levels")
 Return
 
-
-~l & ~LButton::
-	Send, {space}Levels{enter}
+~LButton::
+	NodeFunction("h", "Histogram Scan")
+	NodeFunction("l", "Levels")
 Return
 
-^l::
-	Send, {space}Levels{enter}
+NodeFunction(hotkey, nodeName)
+{
+	enableSend := !enableSend
+
+	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
+	{
+			Send, {space}%NodeName%{enter}
+			sleep, globalSleepTimer
+	}
+
+	SetTimer, DisableSend, 50
+}
+
+DisableSend:
+enableSend := 0
 Return
 
+; NodeFunction_Complex
+; {
+; 	enableSend_Complex := !enableSend
 
-~w & ~LButton::
-	Send, {space}Warp{enter}
-Return
+; 	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
+; 	{
+; 			Send, {space}%NodeName%{enter}
+; 			sleep, globalSleepTimer
+; 	}
 
-^w::
-	Send, {space}warp{enter}
-Return
+; 	SetTimer, DisableSend_Complex, 50
+; }
+
+; DisableSend_Complex:
+; enableSend_Complex := 0
+; Return
+
+
+
+~w::
+	If GetKeyState("LButton","D")
+	{
+		NodeName = warp
+		if(GetKeyState("Shift", "D"))
+		{
+			NodeName = directionalWarp
+		}
+		Send, {space}%NodeName%{enter}	
+		sleep, 500
+	}
+Return	
+
 
 !w::
 	Send, {space}Directional Warp{enter}
@@ -109,7 +149,7 @@ Return
 Return	
 
 
-; --- Common Noise Groups
+; ----- Common Noise Groups -----
 
 ~c & 1::
 		Send, {space}Clouds 1{enter}
