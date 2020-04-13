@@ -17,10 +17,10 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; If you want different behavior depending on wether or now modifier keys are pressed down,
 ; use the function NodeFunction declared at the bottom of this script.
 
-; The best way to do so is to define the parameters in a string variable, then use it on ~*LButton (first line under 'Atomic Nodes' Header)
-; as well as on the key you want to use as hotkey.
+; The easiest way to create a new hotkey is by using the NodeFunction.
 ; Parameters are as follows: Hotkey, NodeName, ShiftNodeName, ControlNodeName, AltNodeName.
-; If in doubt, try to copy one existing hotkey and modify parts of it.
+; Only the first two parameters are necessary.
+; If in doubt, try to copy an existing hotkey and modify parts of it.
 
 
 ; ----- Commenting -----
@@ -36,63 +36,36 @@ Return
 
 ; ----- Atomic Nodes -----
 
-~*LButton::
-	bString := "b, Blend, Blur, Blur HQ"
-	; NodeFunction(bString)
-
-	hString := "h, Histogram Scan, Histogram Range"
-	; NodeFunction(hString)
-
-	lString := "l, Levels"
-	; NodeFunction(lString)
-
-	wString := "w, Warp, Directional Warp"
-	; NodeFunction(wString)
-
-	tString := "t, Transform 2D"
-	; NodeFunction(tString)
-
-	nString := "n, Normal, Normal Sobel"
-	; NodeFunction(nString)
-
-	uString := "u, Uniform Color, Normal Color"
-	; NodeFunction(uString)
-
-	pString := "p, Perlin"
-	; NodeFunction(pString)
-
-Return
-
 ~*b::
-	NodeFunction(bString)
+	NodeFunction("b, Blend, Blur, Blur HQ")
 Return
 
 ~*h::
-	NodeFunction(hString)
+	NodeFunction("h, Histogram Scan, Histogram Range")
 Return
 
 ~*l::
-	NodeFunction(lString)
+	NodeFunction("l, Levels")
 Return
 
 ~*w::
-	NodeFunction(wString)
+	NodeFunction("w, Warp, Directional Warp")
 Return
 
 ~*t::
-	NodeFunction(tString)
+	NodeFunction("t, Transform 2D")
 Return
 
 ~*n::
-	NodeFunction(nString)
+	NodeFunction("n, Normal, Normal Sobel")
 Return
 
 ~*u::
-	NodeFunction(uString)
+	NodeFunction("u, Uniform Color, Normal Color")
 Return
 
 ~*p::
-	NodeFunction(pString)
+	NodeFunction("p, Perlin")
 Return
 
 
@@ -161,10 +134,6 @@ NodeFunction(inputString)
 	altName = % parameterArray[5]
 
 
-	; -- this in conjunction with 'SetTimer, DisableSend, 50' makes it so
-	;    that this function cannot be called multiple times at once.
-	enableSend := !enableSend
-
 	; -- Only do something if the hotkey and the left mouse button are pressed.
 	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
 	{
@@ -186,10 +155,8 @@ NodeFunction(inputString)
 		; -- send the input
 		Send, {space}%NodeName%{enter}
 
-		Sleep, 1000
+		Sleep, 500
 	}
-
-	SetTimer, DisableSend, 2000
 }
 
 DisableSend:
