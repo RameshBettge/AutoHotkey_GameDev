@@ -30,9 +30,13 @@ Return
 	NodeFunction("l", "Levels")
 Return
 
-~LButton::
+~*LButton::
+	
+
 	NodeFunction("h", "Histogram Scan")
 	NodeFunction("l", "Levels")
+	NodeFunction_Complex("w", "Warp", "Directional Warp", "", "")
+	NodeFunction_Complex("b", "Blend", "Blur", "Blur HQ Grayscale", "Blur HQ Color")
 Return
 
 NodeFunction(hotkey, nodeName)
@@ -52,37 +56,50 @@ DisableSend:
 enableSend := 0
 Return
 
-; NodeFunction_Complex
-; {
-; 	enableSend_Complex := !enableSend
 
-; 	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
-; 	{
-; 			Send, {space}%NodeName%{enter}
-; 			sleep, globalSleepTimer
-; 	}
+~*w::
+	NodeFunction_Complex("w", "Warp", "Directional Warp", "", "")
+Return
 
-; 	SetTimer, DisableSend_Complex, 50
-; }
+~*b::
+	NodeFunction_Complex("b", "Blend", "Blur", "Blur HQ", "")
+Return
 
-; DisableSend_Complex:
-; enableSend_Complex := 0
-; Return
+NodeFunction_Complex(hotkey, baseName, shiftName, controlName, altName)
+{
+	enableSend_Complex := !enableSend
 
-
-
-~w::
-	If GetKeyState("LButton","D")
+	; -- Which NodeName is used depends on which modifier key is pressed.
+	NodeName = %baseName%
+	if(GetKeyState("Shift", "P") && StrLen(shiftName) > 0)
 	{
-		NodeName = warp
-		if(GetKeyState("Shift", "D"))
-		{
-			NodeName = directionalWarp
-		}
-		Send, {space}%NodeName%{enter}	
-		sleep, 500
+		NodeName = %shiftName%
 	}
-Return	
+	if(GetKeyState("Control", "P") && StrLen(controlName) > 0)
+	{
+		NodeName = %controlName%
+	}
+	if(GetKeyState("Alt", "P") && StrLen(altName) > 0)
+	{
+		NodeName = %altName%
+	}
+
+	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
+	{
+			Send, {space}%NodeName%{enter}
+			sleep, globalSleepTimer
+	}
+
+	SetTimer, DisableSend_Complex, 50
+}
+
+DisableSend_Complex:
+enableSend_Complex := 0
+Return
+
+
+
+
 
 
 !w::
@@ -121,26 +138,6 @@ Return
 	Send, {space}Perlin{enter}
 Return
 
-
-~b & ~LButton::
-	Send, {space}blend{enter}
-Return
-
-^b::
-	Send, {space}blend{enter}
-Return
-
-+^b::
-	Send, {space}blur{enter}
-Return
-
-!b::
-	Send, {space}blur hq grayscale{enter}
-Return
-
-+^!b::
-	Send, {space}blur hq color{enter}
-Return
 
 ~r::
 	If GetKeyState("LButton","D")
