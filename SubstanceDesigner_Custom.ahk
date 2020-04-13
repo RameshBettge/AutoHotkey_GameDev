@@ -22,6 +22,44 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; Parameters are as follows: Hotkey, NodeName, ShiftNodeName, ControlNodeName, AltNodeName.
 ; If in doubt, try to copy one existing hotkey and modify parts of it.
 
+loop
+{
+	bString := "b, Blend, Blur, Blur HQ"
+	NodeFunction(bString)
+
+	; MsgBox GutenTag
+	;  sleep 500
+}
+
+SetTimer, Atomic, 10
+
+Atomic:
+	bString := "b, Blend, Blur, Blur HQ"
+	NodeFunction(bString)
+
+	hString := "h, Histogram Scan, Histogram Range"
+	NodeFunction(hString)
+
+	lString := "l, Levels"
+	NodeFunction(lString)
+
+	wString := "w, Warp, Directional Warp"
+	NodeFunction(wString)
+
+	tString := "t, Transform 2D"
+	NodeFunction(tString)
+
+	nString := "n, Normal, Normal Sobel"
+	NodeFunction(nString)
+
+	uString := "u, Uniform Color, Normal Color"
+	NodeFunction(uString)
+
+	pString := "p, Perlin"
+	NodeFunction(pString)
+
+	MsgBox SchmutenPrag
+Return
 
 ; ----- Commenting -----
 ^f::
@@ -63,37 +101,37 @@ Return
 
 Return
 
-~*b::
-	NodeFunction(bString)
-Return
+; ~*b::
+; 	NodeFunction(bString)
+; Return
 
-~*h::
-	NodeFunction(hString)
-Return
+; ~*h::
+; 	NodeFunction(hString)
+; Return
 
-~*l::
-	NodeFunction(lString)
-Return
+; ~*l::
+; 	NodeFunction(lString)
+; Return
 
-~*w::
-	NodeFunction(wString)
-Return
+; ~*w::
+; 	NodeFunction(wString)
+; Return
 
-~*t::
-	NodeFunction(tString)
-Return
+; ~*t::
+; 	NodeFunction(tString)
+; Return
 
-~*n::
-	NodeFunction(nString)
-Return
+; ~*n::
+; 	NodeFunction(nString)
+; Return
 
-~*u::
-	NodeFunction(uString)
-Return
+; ~*u::
+; 	NodeFunction(uString)
+; Return
 
-~*p::
-	NodeFunction(pString)
-Return
+; ~*p::
+; 	NodeFunction(pString)
+; Return
 
 
 
@@ -149,6 +187,13 @@ return
 
 ; ----- ----- ----- Functions ----- ----- -----
 
+global LastHotkeyUsed = ""
+
+
+^+t::
+	MsgBox %LastHotkeyUsed%
+Return
+
 NodeFunction(inputString)
 {
 	; -- parse all inputs
@@ -160,14 +205,20 @@ NodeFunction(inputString)
 	controlName = % parameterArray[4]
 	altName = % parameterArray[5]
 
-
-	; -- this in conjunction with 'SetTimer, DisableSend, 50' makes it so
-	;    that this function cannot be called multiple times at once.
-	enableSend := !enableSend
-
 	; -- Only do something if the hotkey and the left mouse button are pressed.
 	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
 	{
+		; if(!GetKeyState(LastHotkeyUsed, "p") && StrLen(LastHotkeyUsed) > 0)
+		; {
+
+		; }
+
+		; else
+		; { 
+		; 	; MsgBox %LastHotkeyUsed%
+		; 	LastHotkeyUsed := ""
+		; }
+
 		; -- Which NodeName is used depends on which modifier key is pressed.
 		NodeName = %baseName%
 		if(StrLen(shiftName) > 0 && GetKeyState("Shift", "P"))
@@ -186,12 +237,8 @@ NodeFunction(inputString)
 		; -- send the input
 		Send, {space}%NodeName%{enter}
 
-		Sleep, 1000
+		LastHotkeyUsed := hotkey
 	}
 
-	SetTimer, DisableSend, 2000
+	
 }
-
-DisableSend:
-enableSend := 0
-Return
