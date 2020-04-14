@@ -17,22 +17,16 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; If you want different behavior depending on wether or now modifier keys are pressed down,
 ; use the function NodeFunction declared at the bottom of this script.
 
+; TODO: Rework comments
 ; The best way to do so is to define the parameters in a string variable, then use it on ~*LButton (first line under 'Atomic Nodes' Header)
 ; as well as on the key you want to use as hotkey.
 ; Parameters are as follows: Hotkey, NodeName, ShiftNodeName, ControlNodeName, AltNodeName.
 ; If in doubt, try to copy one existing hotkey and modify parts of it.
 
-loop
-{
-	bString := "b, Blend, Blur, Blur HQ"
-	NodeFunction(bString)
 
-	; MsgBox GutenTag
-	;  sleep 500
-}
+SetTimer, Atomic, 50
 
-SetTimer, Atomic, 10
-
+; TODO: Try to return if node function was successful. if so, try to delay next check. Use a smaller value for SetTimer.
 Atomic:
 	bString := "b, Blend, Blur, Blur HQ"
 	NodeFunction(bString)
@@ -57,8 +51,6 @@ Atomic:
 
 	pString := "p, Perlin"
 	NodeFunction(pString)
-
-	MsgBox SchmutenPrag
 Return
 
 ; ----- Commenting -----
