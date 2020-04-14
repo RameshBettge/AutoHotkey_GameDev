@@ -23,6 +23,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; If in doubt, try to copy an existing hotkey and modify parts of it.
 
 
+
+
 ; ----- Commenting -----
 ^f::
 	Send, {space}frame{enter}
