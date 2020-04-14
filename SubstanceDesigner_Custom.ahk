@@ -24,33 +24,55 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; If in doubt, try to copy one existing hotkey and modify parts of it.
 
 
-SetTimer, Atomic, 50
+SetTimer, Atomic, 5
 
-; TODO: Try to return if node function was successful. if so, try to delay next check. Use a smaller value for SetTimer.
+LastHotkeyUsed = ""
+
 Atomic:
-	bString := "b, Blend, Blur, Blur HQ"
-	NodeFunction(bString)
 
-	hString := "h, Histogram Scan, Histogram Range"
-	NodeFunction(hString)
+	canAcceptHotkey := true
 
-	lString := "l, Levels"
-	NodeFunction(lString)
+	; For some reason, an empty string is evaluated as '..'
+	if(StrLen(LastHotkeyUsed) == 1)
+	{
+		GetKeyState("b", "p")
 
-	wString := "w, Warp, Directional Warp"
-	NodeFunction(wString)
+		if(!GetKeyState(LastHotkeyUsed, "p"))
+		{
+			LastHotkeyUsed = ""
+		}
+		else 
+		{
+			canAcceptHotkey := false
+		}
+	}
 
-	tString := "t, Transform 2D"
-	NodeFunction(tString)
+	if(canAcceptHotkey)
+	{
+		bString := "b, Blend, Blur, Blur HQ"
+		NodeFunction(bString)
 
-	nString := "n, Normal, Normal Sobel"
-	NodeFunction(nString)
+		hString := "h, Histogram Scan, Histogram Range"
+		NodeFunction(hString)
 
-	uString := "u, Uniform Color, Normal Color"
-	NodeFunction(uString)
+		lString := "l, Levels"
+		NodeFunction(lString)
 
-	pString := "p, Perlin"
-	NodeFunction(pString)
+		wString := "w, Warp, Directional Warp"
+		NodeFunction(wString)
+
+		tString := "t, Transform 2D"
+		NodeFunction(tString)
+
+		nString := "n, Normal, Normal Sobel"
+		NodeFunction(nString)
+
+		uString := "u, Uniform Color, Normal Color"
+		NodeFunction(uString)
+
+		pString := "p, Perlin"
+		NodeFunction(pString)
+	}
 Return
 
 ; ----- Commenting -----
@@ -179,8 +201,6 @@ return
 
 ; ----- ----- ----- Functions ----- ----- -----
 
-global LastHotkeyUsed = ""
-
 
 ^+t::
 	MsgBox %LastHotkeyUsed%
@@ -200,17 +220,6 @@ NodeFunction(inputString)
 	; -- Only do something if the hotkey and the left mouse button are pressed.
 	If (GetKeyState("LButton","D")  && GetKeyState(hotkey, "p"))
 	{
-		; if(!GetKeyState(LastHotkeyUsed, "p") && StrLen(LastHotkeyUsed) > 0)
-		; {
-
-		; }
-
-		; else
-		; { 
-		; 	; MsgBox %LastHotkeyUsed%
-		; 	LastHotkeyUsed := ""
-		; }
-
 		; -- Which NodeName is used depends on which modifier key is pressed.
 		NodeName = %baseName%
 		if(StrLen(shiftName) > 0 && GetKeyState("Shift", "P"))
@@ -229,8 +238,8 @@ NodeFunction(inputString)
 		; -- send the input
 		Send, {space}%NodeName%{enter}
 
+		; Declare that lastHotkeyUsed references a global variable.
+		global LastHotkeyUsed
 		LastHotkeyUsed := hotkey
 	}
-
-	
 }
