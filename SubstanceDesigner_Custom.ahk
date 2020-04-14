@@ -5,7 +5,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 #IfWinActive ahk_exe Substance Designer.exe
 
-; ----- --- HOW TO --- -----
+; ----- --- ! HOW TO USE ! --- -----
 
 ; to add simple hotkeys, just type in the key followed by :: and the instructions.
 ; e.g.: 
@@ -16,64 +16,40 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ; If you want different behavior depending on wether or now modifier keys are pressed down,
 ; use the function NodeFunction declared at the bottom of this script.
+; Additional calls to the NodeFunction can be added in NodeFunctionCalls.
 
-; TODO: Rework comments
-; The best way to do so is to define the parameters in a string variable, then use it on ~*LButton (first line under 'Atomic Nodes' Header)
-; as well as on the key you want to use as hotkey.
 ; Parameters are as follows: Hotkey, NodeName, ShiftNodeName, ControlNodeName, AltNodeName.
 ; If in doubt, try to copy one existing hotkey and modify parts of it.
 
 
-SetTimer, Atomic, 5
+SetTimer, NodeFunctionCalls, 5
 
 LastHotkeyUsed = ""
 
-Atomic:
+; ----- Atomic Nodes -----
+NodeFunctionCalls:
 
-	canAcceptHotkey := true
-
-	; For some reason, an empty string is evaluated as '..'
-	if(StrLen(LastHotkeyUsed) == 1)
+	if(CanAcceptHotkey())
 	{
-		GetKeyState("b", "p")
+		NodeFunction("b, Blend, Blur, Blur HQ")
 
-		if(!GetKeyState(LastHotkeyUsed, "p"))
-		{
-			LastHotkeyUsed = ""
-		}
-		else 
-		{
-			canAcceptHotkey := false
-		}
-	}
+		NodeFunction("h, Histogram Scan, Histogram Range")
 
-	if(canAcceptHotkey)
-	{
-		bString := "b, Blend, Blur, Blur HQ"
-		NodeFunction(bString)
+		NodeFunction("l, Levels")
 
-		hString := "h, Histogram Scan, Histogram Range"
-		NodeFunction(hString)
+		NodeFunction("w, Warp, Directional Warp")
 
-		lString := "l, Levels"
-		NodeFunction(lString)
+		NodeFunction("t, Transform 2D")
 
-		wString := "w, Warp, Directional Warp"
-		NodeFunction(wString)
+		NodeFunction("n, Normal, Normal Sobel")
 
-		tString := "t, Transform 2D"
-		NodeFunction(tString)
+		NodeFunction("u, Uniform Color, Normal Color")
 
-		nString := "n, Normal, Normal Sobel"
-		NodeFunction(nString)
-
-		uString := "u, Uniform Color, Normal Color"
-		NodeFunction(uString)
-
-		pString := "p, Perlin"
-		NodeFunction(pString)
+		NodeFunction("p, Perlin")
 	}
 Return
+
+
 
 ; ----- Commenting -----
 ^f::
@@ -83,69 +59,6 @@ Return
 ~c & ~LButton::
 	Send, {space}comment{enter}
 Return
-
-
-
-; ----- Atomic Nodes -----
-
-~*LButton::
-	bString := "b, Blend, Blur, Blur HQ"
-	; NodeFunction(bString)
-
-	hString := "h, Histogram Scan, Histogram Range"
-	; NodeFunction(hString)
-
-	lString := "l, Levels"
-	; NodeFunction(lString)
-
-	wString := "w, Warp, Directional Warp"
-	; NodeFunction(wString)
-
-	tString := "t, Transform 2D"
-	; NodeFunction(tString)
-
-	nString := "n, Normal, Normal Sobel"
-	; NodeFunction(nString)
-
-	uString := "u, Uniform Color, Normal Color"
-	; NodeFunction(uString)
-
-	pString := "p, Perlin"
-	; NodeFunction(pString)
-
-Return
-
-; ~*b::
-; 	NodeFunction(bString)
-; Return
-
-; ~*h::
-; 	NodeFunction(hString)
-; Return
-
-; ~*l::
-; 	NodeFunction(lString)
-; Return
-
-; ~*w::
-; 	NodeFunction(wString)
-; Return
-
-; ~*t::
-; 	NodeFunction(tString)
-; Return
-
-; ~*n::
-; 	NodeFunction(nString)
-; Return
-
-; ~*u::
-; 	NodeFunction(uString)
-; Return
-
-; ~*p::
-; 	NodeFunction(pString)
-; Return
 
 
 
@@ -201,10 +114,35 @@ return
 
 ; ----- ----- ----- Functions ----- ----- -----
 
-
+; Debug Log LastHotkeyUsed
 ^+t::
 	MsgBox %LastHotkeyUsed%
 Return
+
+
+CanAcceptHotkey()
+{
+	global LastHotkeyUsed
+	canAcceptHotkey := true
+
+	; Check if a hotkey had been pressed. For some reason, an empty string is evaluated as '..'
+	if(StrLen(LastHotkeyUsed) == 1)
+	{
+		GetKeyState("b", "p")
+
+		if(!GetKeyState(LastHotkeyUsed, "p"))
+		{
+			; Hotkey has been released. LastHotkeyUsed-variable is reset.
+			LastHotkeyUsed = ""
+		}
+		else 
+		{
+			canAcceptHotkey := false
+		}
+	}
+
+	return canAcceptHotkey
+}
 
 NodeFunction(inputString)
 {
